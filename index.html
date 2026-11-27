@@ -3,25 +3,52 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>FlowSurf4D: Dynamic Surface Reconstruction with Dense Correspondence from Multi-View Video</title>
+  <meta name="description" content="FlowSurf4D reconstructs deforming surfaces from multi-view video that are accurate in every frame and in dense correspondence over time, using bidirectional 3D flow fields between adjacent frames.">
+  <meta name="keywords" content="FlowSurf4D, dynamic surface reconstruction, 4D reconstruction, dense correspondence, scene flow, signed distance field, multi-view video, ActorsHQ, DeformingThings4D, TaoGS">
   <meta name="author" content="Mohamed Ebbed, Daniele Baieri, Vladislav Golyanik, Zorah Lähner">
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="FlowSurf4D: Dynamic Surface Reconstruction with Dense Correspondence from Multi-View Video">
+  <meta property="og:description" content="Accurate dynamic surfaces and dense correspondences over the whole sequence from multi-view video.">
+  <meta property="og:url" content="https://mohamed-ebbed.github.io/FlowSurf4D/">
+  <meta property="og:image" content="https://mohamed-ebbed.github.io/FlowSurf4D/static/images/social_preview.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
   <meta name="theme-color" content="#2563eb">
   <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="static/images/favicon-32.png">
   <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="static/css/bulma.min.css">
-  <link rel="stylesheet" href="static/css/index.css">
-  <style>
-    html, body { min-height: 100%; }
-    body { display: flex; flex-direction: column; justify-content: center; min-height: 100vh; }
-    .coming-soon { margin-top: 2.5rem; font-size: 1.35rem; font-weight: 600; color: var(--text-secondary, #555); letter-spacing: .02em; }
-  </style>
+  <link rel="stylesheet" href="static/css/index.css?v=20261126095909">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/index.js?v=20261123072332"></script>
+  <script defer src="static/js/cmp_data.js?v=20261123072332"></script>
+  <script defer src="static/js/corr_data.js?v=20261123072332"></script>
+  <script defer src="static/js/media.js?v=20261123072332"></script>
+  <script defer src="static/js/seq_data.js?v=20261123180547"></script>
+  <script defer src="static/js/track_data.js?v=20261123072332"></script>
+  <script defer src="static/js/nvs_data.js?v=20261123161402"></script>
+  <script defer src="static/js/seqview.js?v=20261123161402"></script>
 </head>
 <body>
+
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <main id="main-content">
+
   <section class="hero">
     <div class="hero-body">
       <div class="container is-max-desktop has-text-centered">
@@ -57,9 +84,328 @@
           </a>
         </div>
 
-        <p class="coming-soon">Project page coming soon.</p>
+        <div class="publication-links">
+          <span class="link-block">
+            <a class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true" title="Coming soon">
+              <span class="icon"><i class="ai ai-arxiv"></i></span>
+              <span>arXiv</span>
+            </a>
+          </span>
+          <span class="link-block">
+            <a class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true">
+              <span class="icon"><i class="fab fa-github"></i></span>
+              <span>Code (coming soon)</span>
+            </a>
+          </span>
+          <span class="link-block">
+            <a href="#video" class="button is-normal is-rounded is-dark">
+              <span class="icon"><i class="fas fa-film"></i></span>
+              <span>Video</span>
+            </a>
+          </span>
+        </div>
       </div>
     </div>
   </section>
+
+  <section class="hero opening">
+    <div class="container is-max-desktop">
+      <video class="comparison-video" autoplay muted loop playsinline controls preload="metadata" poster="static/images/opening_poster.jpg">
+        <source src="static/videos/opening.mp4" type="video/mp4">
+      </video>
+      <p class="figure-caption">
+        The performer in this scene is our reconstruction of a real multi-view capture (TaoGS): the surface, the correspondences, the flow and the albedo used for relighting all come from FlowSurf4D. Sound can be switched on in the player.
+      </p>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <img class="teaser-image" src="static/images/teaser.jpg"
+             alt="Posed multi-view video of a dancer with a sword is reconstructed by FlowSurf4D into detailed meshes with long-term correspondences and point tracks, which are used for texture transfer, relighting and material editing, and placed in virtual environments.">
+        <h2 class="subtitle has-text-centered">
+          <b>FlowSurf4D</b> reconstructs a dynamic surface from multi-view video (left, a dataset with challenging motions and fine details) as high-fidelity meshes with dense correspondences over time. Points of the first frame are tracked in every later frame, which gives dense 3D point tracks. These correspondences come from bidirectional 3D flow fields between adjacent frames, which relate each frame to its neighbors during optimization. The correspondences induced by the flow fields are robust enough for texture transfer from the first frame to every other frame and for relighting with an albedo estimated through the correspondences, and the textured meshes can be placed in virtual environments.
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Applications such as texture editing and animation need deforming surfaces reconstructed from multi-view video to be accurate in every frame and in dense correspondence over time.
+              Existing methods trade one for the other: reconstructing every frame independently gives the most accurate surfaces but no correspondences, and canonical-deformation methods relate the frames only implicitly, through deformations into a canonical space that are fit to each frame separately and need not agree, resulting in inaccurate correspondences.
+              We present FlowSurf4D, which represents a deforming surface by a canonical signed distance field, deformation fields, and bidirectional 3D flow fields between adjacent frames that make the correspondences between frames explicit.
+              The flow fields are supervised by optical flow and optimized jointly with the surfaces of adjacent frames in a sliding window.
+              Chaining the flow fields yields dense correspondences between all frames, more accurate than those obtained through the canonical space of the same model.
+              On ActorsHQ and DeformingThings4D, FlowSurf4D reconstructs the most accurate surfaces among dynamic methods on every scene, with the lowest temporal consistency error on DeformingThings4D, and is competitive with per-frame static methods.
+              On DeformingThings4D, its correspondences have a 43% lower mean geodesic error than those that the next best dynamic method provides, whose surfaces are less accurate on every scene, and on real captures they agree best with 2D point tracks in held-out cameras.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Method</h2>
+      <img class="wide-figure" src="static/images/method.jpg"
+           alt="Method overview: (a) motion-guided ray sampling, (b) flow fields between adjacent frames and deformation fields to the canonical space in a sliding window, (c) correspondences between meshes.">
+      <p class="figure-caption">
+        Motion is modeled by deformation fields that map each frame to the canonical space and, unlike previous canonical-deformation methods, by bidirectional flow fields between adjacent frames, which are optimized jointly in a sliding window.
+        (a)&nbsp;Motion-guided ray sampling. (b)&nbsp;Flow fields between adjacent frames and deformation fields to the canonical space, in a sliding window. (c)&nbsp;Correspondences: vertices moved by the flow field (ring) and matched to the next mesh (dot).
+      </p>
+
+      <h3 class="title is-5 result-heading steps-heading">Step by Step</h3>
+      <div class="steps" id="method-steps">
+        <div class="steps-nav">
+          <button type="button" class="steps-btn" data-name="method_1_canonical" data-text="A canonical signed distance field is fit to the multi-view images with a coarse-to-fine hash grid."><span>1</span>Canonical surface</button>
+          <button type="button" class="steps-btn" data-name="method_2_deformation" data-text="Deformation fields map every frame to the canonical space. On their own, they give no direct mapping from one frame to the next."><span>2</span>Deformation fields</button>
+          <button type="button" class="steps-btn" data-name="method_3_window" data-text="Bidirectional 3D flow fields relate each frame to its neighbors; in a sliding window (previous, current, next frame) they are optimized jointly with the surfaces."><span>3</span>Flow fields in a sliding window</button>
+          <button type="button" class="steps-btn" data-name="method_4_normals" data-text="Surface normals carried through the flow fields must agree with the normals of the adjacent frame."><span>4</span>Normal consistency</button>
+          <button type="button" class="steps-btn" data-name="method_5_slide" data-text="When the window moves on, flow fields inside it are kept, the one that leaves it is dropped and a new one is initialized."><span>5</span>Moving the window</button>
+          <button type="button" class="steps-btn" data-name="method_6_flow" data-text="The 3D flow is volume-rendered into 2D flow and supervised by optical flow (FlowSeek)."><span>6</span>Optical-flow supervision</button>
+          <button type="button" class="steps-btn" data-name="method_7_sampling" data-text="Rays are sampled where the subject moves: with uniform sampling 89% of the rays hit the background, with motion-guided sampling 10%."><span>7</span>Motion-guided ray sampling</button>
+          <button type="button" class="steps-btn" data-name="method_8_correspondences" data-text="Each vertex is moved by the flow field and matched to the nearest vertex of the next mesh; chaining these matches carries the colors of frame&nbsp;1 through the whole sequence."><span>8</span>Correspondences</button>
+          <button type="button" class="steps-sound" aria-pressed="false" title="The clips are narrated"><i class="fas fa-volume-mute"></i><span>Sound off</span></button>
+        </div>
+        <video class="comparison-video steps-video" muted playsinline controls preload="none" poster="static/images/method_1_canonical_poster.jpg">
+          <source src="static/videos/method_1_canonical.mp4" type="video/mp4">
+        </video>
+        <p class="figure-caption steps-text">A canonical signed distance field is fit to the multi-view images with a coarse-to-fine hash grid.</p>
+      </div>
+      <p class="cmp-hint steps-hint">All steps are drawn from the checkpoints of a real run (TaoGS drawsword). The clips are narrated (switch the sound on) and play one after the other; pick a step to jump to it.</p>
+    </div>
+  </section>
+
+  <section class="section hero is-light" id="results">
+    <div class="container is-max-widescreen">
+      <h2 class="title is-3 has-text-centered">Results</h2>
+      <p class="cmp-lead">
+        Ours next to any other method over the whole sequence: geometry on all 16 DeformingThings4D and ActorsHQ scenes and the 6 TaoGS captures, correspondences on DeformingThings4D, and point tracks on TaoGS and ActorsHQ, and novel-view renderings on ActorsHQ and the humanoid DeformingThings4D scenes. Pick a tab, a scene and a method.
+      </p>
+      <div id="cmp-viewer" class="cmp-viewer"></div>
+    </div>
+  </section>
+
+  <section class="section" id="ablations">
+    <div class="container is-max-widescreen">
+      <h2 class="title is-3 has-text-centered">Ablations</h2>
+      <p class="cmp-lead">Ground truth, our full model and the model without one component, same frame and camera, followed by a slider between the last two.</p>
+      <div class="video-grid">
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/abl_nonorm_peasantgirl_poster.jpg">
+            <source src="static/videos/abl_nonorm_peasantgirl.mp4" type="video/mp4">
+          </video>
+          <figcaption>Without the normal-consistency loss <i>L</i><sub>norm</sub>: DeformingThings4D peasantgirl, frame&nbsp;16.</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/abl_nonorm_actor4_poster.jpg">
+            <source src="static/videos/abl_nonorm_actor4.mp4" type="video/mp4">
+          </video>
+          <figcaption>Without <i>L</i><sub>norm</sub>: ActorsHQ actor4, frame&nbsp;43.</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/abl_nosampling_peasantgirl_poster.jpg">
+            <source src="static/videos/abl_nosampling_peasantgirl.mp4" type="video/mp4">
+          </video>
+          <figcaption>Without motion-guided sampling: peasantgirl, frame&nbsp;34.</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/abl_nosampling_ninja_poster.jpg">
+            <source src="static/videos/abl_nosampling_ninja.mp4" type="video/mp4">
+          </video>
+          <figcaption>Without motion-guided sampling: DeformingThings4D ninja, frame&nbsp;33.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Applications</h2>
+      <h3 class="title is-5 result-heading">Texture Transfer</h3>
+      <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/texture_transfer_poster.jpg">
+        <source src="static/videos/texture_transfer.mp4" type="video/mp4">
+      </video>
+      <p class="figure-caption">A new texture is painted on frame&nbsp;1 only; our correspondences carry it to every later frame, and it stays on the surface while the subject moves.</p>
+
+      <h3 class="title is-5 result-heading">Relighting</h3>
+      <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/relighting_poster.jpg">
+        <source src="static/videos/relighting.mp4" type="video/mp4">
+      </video>
+      <p class="figure-caption">The albedo of frame&nbsp;1 is carried to every frame by our correspondences and relit with warm, cool and moving lights.</p>
+
+      <h3 class="title is-5 result-heading">Virtual Scenes</h3>
+      <div class="video-grid">
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/env_lantern_poster.jpg">
+        <source src="static/videos/env_lantern.mp4" type="video/mp4">
+      </video>
+          <figcaption>Lantern festival</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/env_umbrella2_poster.jpg">
+        <source src="static/videos/env_umbrella2.mp4" type="video/mp4">
+      </video>
+          <figcaption>Rain</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/env_moon_poster.jpg">
+        <source src="static/videos/env_moon.mp4" type="video/mp4">
+      </video>
+          <figcaption>Moonlit field</figcaption>
+        </figure>
+        <figure>
+          <video class="comparison-video" data-autoplay muted loop playsinline controls preload="none" poster="static/images/env_magic_poster.jpg">
+        <source src="static/videos/env_magic.mp4" type="video/mp4">
+      </video>
+          <figcaption>Stage</figcaption>
+        </figure>
+      </div>
+      <p class="figure-caption">Our reconstructions of real captures placed in virtual scenes; the divider shows the geometry (left) and the appearance (right).</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Quantitative Results</h2>
+
+      <div class="results-scroll">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Method</th>
+              <th rowspan="2" class="center">Corr.</th>
+              <th colspan="3" class="center group">ActorsHQ</th>
+              <th colspan="4" class="center group">DeformingThings4D</th>
+            </tr>
+            <tr>
+              <th>CD&darr;</th><th>NC&uarr;</th><th>F@1&uarr;</th>
+              <th>CD&darr;</th><th>NC&uarr;</th><th>F@1&uarr;</th><th>TCE&darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="group-row"><td colspan="9">Dynamic, SDF-based</td></tr>
+            <tr><td>Tensor4D<sup>&dagger;</sup></td><td class="center">(&#10003;)</td><td>8.32</td><td>0.884</td><td>0.831</td><td>16.38</td><td>0.863</td><td>0.662</td><td>6.65</td></tr>
+            <tr><td>NeuS2 (dynamic)</td><td class="center">&#10007;</td><td>4.05</td><td>0.915</td><td>0.959</td><td>10.82</td><td>0.907</td><td class="rk-c">0.803</td><td>5.05</td></tr>
+            <tr><td>MoAngelo</td><td class="center">(&#10003;)</td><td class="rk-c">3.62</td><td>0.916</td><td class="rk-c">0.962</td><td class="rk-c">9.51</td><td>0.878</td><td>0.782</td><td>5.13</td></tr>
+            <tr class="group-row"><td colspan="9">Dynamic, NeRF-based</td></tr>
+            <tr><td>SceNeRFlow</td><td class="center">(&#10003;)</td><td>16.45</td><td>0.705</td><td>0.530</td><td>37.12</td><td>0.583</td><td>0.303</td><td>18.98</td></tr>
+            <tr class="group-row"><td colspan="9">Dynamic, Gaussian-based</td></tr>
+            <tr><td>Dynamic 3DGS</td><td class="center">(&#10003;)</td><td>7.29</td><td>0.735</td><td>0.798</td><td>63.69</td><td>0.725</td><td>0.528</td><td>8.65</td></tr>
+            <tr><td>Dynamic-2DGS<sup>&dagger;</sup></td><td class="center">(&#10003;)</td><td>26.83</td><td>0.641</td><td>0.405</td><td>23.94</td><td>0.714</td><td>0.559</td><td>14.39</td></tr>
+            <tr><td>AT-GS</td><td class="center">(&#10003;)</td><td>5.18</td><td class="rk-c">0.921</td><td>0.941</td><td>18.49</td><td class="rk-c">0.911</td><td>0.773</td><td class="rk-c">3.18</td></tr>
+            <tr><td>4DGS</td><td class="center">(&#10003;)</td><td>10.65</td><td>0.696</td><td>0.652</td><td>19.57</td><td>0.709</td><td>0.486</td><td>12.98</td></tr>
+            <tr><td>SC-GS</td><td class="center">(&#10003;)</td><td>6.81</td><td>0.767</td><td>0.833</td><td>12.20</td><td>0.768</td><td>0.660</td><td>6.70</td></tr>
+            <tr><td>Deformable 3DGS<sup>&dagger;</sup></td><td class="center">(&#10003;)</td><td>8.08</td><td>0.744</td><td>0.748</td><td>14.90</td><td>0.747</td><td>0.564</td><td>8.81</td></tr>
+            <tr class="group-row"><td colspan="9">Dynamic, mesh-based Gaussians</td></tr>
+            <tr><td>GauSTAR</td><td class="center">(&#10003;)</td><td>6.46</td><td>0.895</td><td>0.915</td><td>149.20</td><td>0.790</td><td>0.569</td><td>28.40</td></tr>
+            <tr><td>DG-Mesh<sup>&dagger;</sup></td><td class="center">(&#10003;)</td><td>6.80</td><td>0.871</td><td>0.828</td><td>22.82</td><td>0.826</td><td>0.585</td><td>9.88</td></tr>
+            <tr><td>MaGS<sup>&dagger;</sup></td><td class="center">&#10003;</td><td>15.06</td><td>0.725</td><td>0.481</td><td>26.65</td><td>0.696</td><td>0.307</td><td>10.26</td></tr>
+            <tr class="group-row"><td colspan="9">Per-frame static (no correspondences)</td></tr>
+            <tr class="static-row"><td>NeuS2 (static)</td><td class="center">&#10007;</td><td>4.12</td><td>0.897</td><td>0.949</td><td>10.30</td><td>0.901</td><td>0.803</td><td>4.77</td></tr>
+            <tr class="static-row"><td>2DGS</td><td class="center">&#10007;</td><td>3.74</td><td>0.907</td><td>0.981</td><td>8.30</td><td>0.904</td><td>0.822</td><td>3.68</td></tr>
+            <tr class="static-row"><td>PGSR</td><td class="center">&#10007;</td><td>2.92</td><td>0.924</td><td>0.989</td><td>15.81</td><td>0.856</td><td>0.620</td><td>8.10</td></tr>
+            <tr class="sep"><td>Ours (Lite)</td><td class="center">(&#10003;)</td><td class="rk-b">3.17</td><td class="rk-b">0.939</td><td class="rk-b">0.978</td><td class="rk-b">7.90</td><td class="rk-b">0.926</td><td class="rk-b">0.829</td><td class="rk-b">3.16</td></tr>
+            <tr class="is-ours"><td>Ours</td><td class="center">&#10003;</td><td class="rk-a">3.12</td><td class="rk-a">0.940</td><td class="rk-a">0.980</td><td class="rk-a">7.62</td><td class="rk-a">0.930</td><td class="rk-a">0.834</td><td class="rk-a">2.87</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="figure-caption">
+        <b>Geometry</b> on 6 ActorsHQ and 10 DeformingThings4D scenes (CD, TCE in mm). <span class="rk-a">best</span>, <span class="rk-b">second</span>, <span class="rk-c">third</span> among the dynamic methods. Corr.: &#10003;&nbsp;direct, (&#10003;)&nbsp;indirect, &#10007;&nbsp;none. <sup>&dagger;</sup>Fewer scenes (the method failed on the others).
+      </p>
+
+      <div class="results-scroll" style="margin-top:3rem">
+        <table class="results-table">
+          <thead>
+            <tr><th>Method</th><th>All&darr;</th><th>Early&darr;</th><th>Late&darr;</th><th>AUC&uarr;</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Tensor4D</td><td>16.73</td><td>10.79</td><td>18.50</td><td>0.325</td></tr>
+            <tr><td>SceNeRFlow</td><td>17.28</td><td>5.86</td><td>20.68</td><td>0.337</td></tr>
+            <tr><td>GauSTAR</td><td>17.53</td><td>6.89</td><td>20.70</td><td>0.313</td></tr>
+            <tr><td>Dynamic 3DGS</td><td>7.26</td><td>3.48</td><td>8.38</td><td>0.622</td></tr>
+            <tr><td>4DGS</td><td>17.84</td><td>7.79</td><td>20.83</td><td>0.335</td></tr>
+            <tr><td>SC-GS</td><td>7.56</td><td>2.76</td><td>8.98</td><td class="rk-c">0.632</td></tr>
+            <tr><td>Deformable 3DGS<sup>&dagger;</sup></td><td>11.61</td><td>3.77</td><td>13.94</td><td>0.521</td></tr>
+            <tr><td>Dynamic-2DGS<sup>&dagger;</sup></td><td>15.78</td><td>8.02</td><td>18.08</td><td>0.243</td></tr>
+            <tr><td>DG-Mesh<sup>&dagger;</sup></td><td>15.20</td><td>5.93</td><td>17.96</td><td>0.422</td></tr>
+            <tr><td>MaGS<sup>&dagger;</sup></td><td>11.32</td><td>3.71</td><td>13.59</td><td>0.530</td></tr>
+            <tr><td>MoAngelo</td><td>7.58</td><td>2.73</td><td>9.02</td><td>0.542</td></tr>
+            <tr><td>Ours (Lite)</td><td class="rk-c">5.48</td><td class="rk-c">2.39</td><td class="rk-c">6.40</td><td>0.622</td></tr>
+            <tr><td>Ours, canonical route</td><td class="rk-b">5.08</td><td class="rk-b">2.36</td><td class="rk-b">5.89</td><td class="rk-b">0.645</td></tr>
+            <tr class="is-ours"><td>Ours</td><td class="rk-a">4.14</td><td class="rk-a">1.92</td><td class="rk-a">4.80</td><td class="rk-a">0.695</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="figure-caption">
+        <b>Correspondences on reconstructed surfaces</b> (DeformingThings4D): geodesic error (&times;100) over the 50 frames (All), the first quarter of the sequence (Early) and the rest (Late). <span class="rk-a">best</span>, <span class="rk-b">second</span>, <span class="rk-c">third</span>. <sup>&dagger;</sup>Fewer scenes (the method failed on the others).
+      </p>
+
+      <div class="results-scroll" style="margin-top:3rem">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Variant</th>
+              <th colspan="4" class="center group">ActorsHQ</th>
+              <th colspan="5" class="center group">DeformingThings4D</th>
+            </tr>
+            <tr>
+              <th>CD&darr;</th><th>Acc.&darr;</th><th>Compl.&darr;</th><th>NC&uarr;</th>
+              <th>CD&darr;</th><th>NC&uarr;</th><th>NAE&darr;</th><th>TCE&darr;</th><th>Corr.&darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-ours"><td>Ours (full model)</td><td class="rk-c">3.30</td><td class="rk-a">3.19</td><td class="rk-c">3.42</td><td class="rk-a">0.934</td><td class="rk-b">8.43</td><td class="rk-a">0.894</td><td class="rk-a">18.6</td><td class="rk-a">3.03</td><td class="rk-b">3.40</td></tr>
+            <tr><td><span class="ind"></span> &minus; <i>L</i><sub>norm</sub></td><td class="rk-b">3.29</td><td class="rk-b">3.23</td><td class="rk-b">3.36</td><td class="rk-b">0.933</td><td class="rk-c">8.45</td><td>0.884</td><td>19.8</td><td class="rk-b">3.25</td><td class="rk-c">3.42</td></tr>
+            <tr><td><span class="ind"></span> &minus; <i>L</i><sub>flow</sub></td><td>3.47</td><td class="rk-c">3.27</td><td>3.68</td><td>0.930</td><td>8.78</td><td class="rk-b">0.890</td><td class="rk-b">19.2</td><td>3.34</td><td>8.69</td></tr>
+            <tr><td><span class="ind"></span> &minus; flow fields</td><td class="rk-a">3.27</td><td class="rk-a">3.19</td><td class="rk-a">3.35</td><td class="rk-b">0.933</td><td class="rk-a">8.42</td><td>0.886</td><td class="rk-c">19.6</td><td class="rk-c">3.33</td><td>7.69<sup>*</sup></td></tr>
+            <tr><td><span class="ind"></span> &minus; motion-guided sampling</td><td>3.48</td><td class="rk-b">3.23</td><td>3.72</td><td class="rk-c">0.932</td><td>9.56</td><td class="rk-c">0.889</td><td>19.7</td><td>4.74</td><td class="rk-a">3.19</td></tr>
+            <tr><td><span class="ind"></span> &minus; ARAP, smoothness</td><td>10.18</td><td>13.56</td><td>6.81</td><td>0.812</td><td>10.73</td><td>0.825</td><td>26.3</td><td>6.79</td><td>7.79</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="figure-caption">
+        <b>Ablations</b> on three ActorsHQ and three DeformingThings4D scenes; each row removes one component (&minus;&nbsp;flow fields also removes <i>L</i><sub>flow</sub> and <i>L</i><sub>norm</sub>). <span class="rk-a">best</span>, <span class="rk-b">second</span>, <span class="rk-c">third</span> per column. <sup>*</sup>Through the canonical space.
+      </p>
+
+    </div>
+  </section>
+
+  <section class="section hero is-light" id="video">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Video</h2>
+      <div class="publication-video">
+        <iframe src="https://www.youtube-nocookie.com/embed/mE2zJIyXDcE?rel=0" title="FlowSurf4D video" loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content has-text-centered">
+            <p>
+              This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank" rel="noopener">Academic Project Page Template</a>, which was adopted from the <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> project page.
+              This website is licensed under a <a rel="license noopener" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>
